@@ -18,7 +18,7 @@ function Get-CWJMpipFileSensitivityLabelInfo
 
             $rawFile = Get-Content $filePath -Raw
 
-            $xml = @(findXmlInString -String $rawFile -XmlStartString '<\?xml' -XmlEndString '>')
+            $xml = @(Get-CWJXmlFromString -String $rawFile -XmlStartString '<\?xml' -XmlEndString '>')
 
             if($xml.Count -gt 1)
             {

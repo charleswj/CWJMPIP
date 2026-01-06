@@ -1,4 +1,4 @@
-function findXmlInString
+function Get-CWJXmlFromString
 {
     [CmdletBinding()]
     param

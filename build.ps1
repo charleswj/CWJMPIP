@@ -83,13 +83,13 @@ task Build {
         RootModule        = "$moduleName.psm1"
         ModuleVersion     = $version
         FunctionsToExport = $FunctionsToExport
-        #AliasesToExport   = $AliasesToExport
-        GUID = $moduleGuid
-        Author = 'Charles W. Jones'
-        CompanyName = 'charleswj'
-        Copyright = '(c) {0} Charles W. Jones. All rights reserved.' -f [datetime]::Now.Year
-        Description = ''
-
+        #AliasesToExport  = $AliasesToExport
+        GUID              = $moduleGuid
+        Author            = 'Charles W. Jones'
+        CompanyName       = 'charleswj'
+        Copyright         = '(c) {0} Charles W. Jones. All rights reserved.' -f [datetime]::Now.Year
+        Description       = (gc $PSScriptRoot\ModuleDescription.txt -ea 0)
+        ProjectUri        = 'https://github.com/charleswj/{0}' -f $moduleName
     }
 
     New-ModuleManifest @NewModuleManifestParams

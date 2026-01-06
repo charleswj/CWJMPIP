@@ -12,7 +12,7 @@
 RootModule = 'CWJMPIP.psm1'
 
 # Version number of this module.
-ModuleVersion = '0.0.14'
+ModuleVersion = '0.0.17'
 
 # Supported PSEditions
 # CompatiblePSEditions = @()
@@ -30,7 +30,7 @@ CompanyName = 'charleswj'
 Copyright = '(c) 2026 Charles W. Jones. All rights reserved.'
 
 # Description of the functionality provided by this module
-# Description = ''
+Description = 'PowerShell cmdlet to extract label information from files (maybe more later)'
 
 # Minimum version of the PowerShell engine required by this module
 # PowerShellVersion = ''
@@ -69,7 +69,7 @@ Copyright = '(c) 2026 Charles W. Jones. All rights reserved.'
 # NestedModules = @()
 
 # Functions to export from this module, for best performance, do not use wildcards and do not delete the entry, use an empty array if there are no functions to export.
-FunctionsToExport = 'Get-CWJMpipFileSensitivityLabelInfo'
+FunctionsToExport = 'Get-CWJMpipFileSensitivityLabelInfo', 'Get-CWJXmlFromString'
 
 # Cmdlets to export from this module, for best performance, do not use wildcards and do not delete the entry, use an empty array if there are no cmdlets to export.
 CmdletsToExport = '*'
@@ -101,7 +101,7 @@ PrivateData = @{
         # LicenseUri = ''
 
         # A URL to the main website for this project.
-        # ProjectUri = ''
+        ProjectUri = 'https://github.com/charleswj/CWJMPIP'
 
         # A URL to an icon representing this module.
         # IconUri = ''
