@@ -12,7 +12,7 @@
 RootModule = 'CWJMPIP.psm1'
 
 # Version number of this module.
-ModuleVersion = '0.0.17'
+ModuleVersion = '0.0.30'
 
 # Supported PSEditions
 # CompatiblePSEditions = @()

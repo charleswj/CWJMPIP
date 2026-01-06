@@ -116,13 +116,15 @@ function Get-CWJXmlFromString
         [string]
         $String,
 
+        [Alias('XmlStartString')]
         [Parameter()]
         [string]
-        $XmlStartString = '<',
+        $StartPattern = '<',
 
+        [Alias('XmlEndString')]
         [Parameter()]
         [string]
-        $XmlEndString = '>',
+        $EndPattern = '>',
 
         [Parameter()]
         [switch]
@@ -130,72 +132,115 @@ function Get-CWJXmlFromString
 
         [Parameter()]
         [switch]
-        $ReturnInvalid
+        $ReturnInvalid,
+        
+        [Parameter()]
+        [switch]
+        $HideProgress,
+        
+        [Parameter()]
+        [uint]
+        $MinLength = [uint]::MinValue,
+        
+        [Parameter()]
+        [uint]
+        $MaxLength = [uint]::MaxValue
     )
 
     #TODO: prevent identical start and end strings?
-    #TODO: allow regex?
 
-    $xmlStartOffsetCandidates = @([regex]::Matches($String, $XmlStartString).Index)
+    $xmlStartOffsetCandidates = @([regex]::Matches($String, $StartPattern).Index)
 
-    Write-Verbose ('xmlStartOffsetCandidates: {0}' -f [string]$xmlStartOffsetCandidates)
+    Write-Verbose ('Start offset candidates: {0} - {1}' -f $xmlStartOffsetCandidates.Count, [string]$xmlStartOffsetCandidates)
 
-    $xmlEndOffsetCandidates = @([regex]::Matches($String, $XmlEndString).Index)
+    $xmlEndOffsetCandidates = @([regex]::Matches($String, $EndPattern).Index)
 
     # reversing to start with longest candidates first, otherwise some XML can parse as two valid objects 
     [array]::Reverse($xmlEndOffsetCandidates)
 
-    Write-Verbose ('xmlEndOffsetCandidates:   {0}' -f [string]$xmlEndOffsetCandidates)
+    Write-Verbose ('End offset candidates:   {0} - {1}' -f $xmlEndOffsetCandidates.Count, [string]$xmlEndOffsetCandidates)
 
-    Write-Verbose ('Possible candidates: {0,5}' -f ($xmlStartOffsetCandidates.Count * $xmlEndOffsetCandidates.Count))
+    $xmlPossibleCandidates = $xmlStartOffsetCandidates.Count * $xmlEndOffsetCandidates.Count
+
+    Write-Verbose ('Possible candidates: {0,5}' -f $xmlPossibleCandidates)
 
     $lastValidEnd = -1
+
+    $xmlCandidateCounter = 0
 
     foreach($start in $xmlStartOffsetCandidates)
     {
         foreach($end in $xmlEndOffsetCandidates)
         {
-            if(
-                $start -lt $end -and
+            if(-not $HideProgress)
+            {
+                $xmlCandidateCounter++
 
+                $WriteProgressParams = @{
+                    Activity        = "$xmlCandidateCounter of $xmlPossibleCandidates"
+                    Status          = "$start $end"
+                    PercentComplete = ($xmlCandidateCounter/$xmlPossibleCandidates*100)
+                }
+
+                Write-Progress @WriteProgressParams
+            }
+            # sleep -m 0
+            
+            if($start -lt $end)
+            {
                 # seemed like we were finding valid XML nested inside valid XML, 
                 # so we push the next start offset past the current/last end offset 
-                $start -gt $lastValidEnd
-            )
-            {
-                $length = $end - $start + 1
-                #TODO: need to deal with >1 length ending strings
-
-                $xmlString = $String.Substring($start, $length)
-
-                $xml = $null
-                $isValidXml = $false
-
-                try
+                if($start -gt $lastValidEnd)
                 {
-                    $xml = [xml]$xmlString
-                    $isValidXml = $true
-                    $lastValidEnd = $end
-                }
-                catch{}
+                        $length = $end - $start + 1
+                        #TODO: need to deal with >1 length ending strings
 
-                if($ReturnInvalid -or $null -ne $xml)
-                {
-                    if($ReturnObject)
-                    {
-                        [PSCustomObject]@{
-                            Start  = $start
-                            End    = $end
-                            Length = $length
-                            Valid  = $isValidXml
-                            XML    = $xml
-                            String = $xmlString
+                        # test for min/max candidate length
+                        if($length -ge $MinLength -and $length -le $MaxLength)
+                        {
+                            $xmlString = $String.Substring($start, $length)
+
+                            $xml = $null
+                            $isValidXml = $false
+
+                            try
+                            {
+                                $xml = [xml]$xmlString
+                                $isValidXml = $true
+                                $lastValidEnd = $end
+                            }
+                            catch{}
+
+                            if($ReturnInvalid -or $null -ne $xml)
+                            {
+                                if($ReturnObject)
+                                {
+                                    [PSCustomObject]@{
+                                        Start  = $start
+                                        End    = $end
+                                        Length = $length
+                                        Valid  = $isValidXml
+                                        XML    = $xml
+                                        String = $xmlString
+                                    }
+                                }
+                                else
+                                {
+                                    $xml
+                                }
+                            }
                         }
-                    }
-                    else
-                    {
-                        $xml
-                    }
+
+
+
+
+
+
+
+
+
+
+
                 }
             }
         }
